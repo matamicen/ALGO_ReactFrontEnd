@@ -8,9 +8,15 @@ import algosdk, { encodeObj } from 'algosdk';
 async function execute() {
 console.log("hola pepe!")
 const algodToken = '';
-const algodServer = "https://api.testnet.algoexplorer.io";
+
+const algodServer = "https://node.testnet.algoexplorerapi.io";
+const algoIndexer = "https://algoindexer.testnet.algoexplorerapi.io/"
+// const algodServer = "https://node.algoexplorerapi.io";
+// const algoIndexer = "https://algoindexer.algoexplorerapi.io/"
 const algodPort = '';
+// const algodPortindexer = '8980'
 let algodClient = new algosdk.Algodv2(algodToken, algodServer,algodPort);
+let indexer = new algosdk.Indexer(algodToken, algoIndexer,algodPort);
 
 let wallet;
 let accounts;
@@ -19,18 +25,27 @@ try {
 
  wallet = new MyAlgo();
  accounts = await wallet.connect();
+ console.log('accounts:')
+console.log(accounts)
  addresses = accounts.map(account => account.address);
    
 } catch (err) {
   console.error(err);
 }
+console.log('addresses:')
 console.log(addresses)
 
-let accountInfo = await algodClient.accountInformation(addresses[0]).do();
+// let accountInfo = await algodClient.accountInformation(addresses[0]).do();
 
-console.log("Account balance: %d microAlgos", accountInfo.amount);
+// console.log("Account balance: %d microAlgos", accountInfo.amount);
+// let accountInfo = await algodClient.accountInformation(addresses[0]).do();
+let accountInfo = await indexer.lookupAccountByID(addresses[0]).do()
 
-const receiver = "HZ57J3K46JIJXILONBBZOHX6BKPXEM2VVXNRFSUED6DKFD5ZD24PMJ3MVA";
+console.log("Information for Account: " + JSON.stringify(accountInfo, undefined, 2));
+// console.log("Information for Account: " + JSON.stringify(accountInfo));
+// console.log("Account balance: %d microAlgos", accountInfo);
+
+const receiver = "MEBVPYXHXJIS2RBGIL62HM4ARR5B4U46HJ6KS2T3ACWPVSZEE4NOLI6CJM";
 const enc = new TextEncoder();
 const note = new Uint8Array(Buffer.from('Hello World!!!'));
 let amount = 5000000;
@@ -57,22 +72,22 @@ let txn = {
         // const encoded1 = encodeObj(signedTxn);
         const encoded1 = Buffer.from(encodeObj(signedTxn)).toString("base64");
         // Submit the transaction
-        // await algodClient.sendRawTransaction(signedTxn.blob).do();
+        await algodClient.sendRawTransaction(signedTxn.blob).do();
 
-                const response =  await fetch('http://localhost:8080', {
-                    method: 'POST',
-                    headers: {
-                      "Access-Control-Allow-Origin": "*",
-                      'Accept': 'application/json',
-                      'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                      param1: encoded1,
-                      // secondParam: 'yourOtherValue',
-                    })
-                  });
-                  const result = await response.json();
-                  console.log(result)
+                // const response =  await fetch('http://localhost:8080', {
+                //     method: 'POST',
+                //     headers: {
+                //       "Access-Control-Allow-Origin": "*",
+                //       'Accept': 'application/json',
+                //       'Content-Type': 'application/json',
+                //     },
+                //     body: JSON.stringify({
+                //       param1: encoded1,
+                //       // secondParam: 'yourOtherValue',
+                //     })
+                //   });
+                //   const result = await response.json();
+                //   console.log(result)
 
   } catch(err) {
       console.error(err); 
